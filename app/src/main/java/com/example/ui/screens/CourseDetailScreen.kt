@@ -118,7 +118,15 @@ fun CourseDetailScreen(
     var showAddDeadlineDialog by remember { mutableStateOf(false) }
     var showDeleteCourseDialog by remember { mutableStateOf(false) }
     var viewingNote by remember { mutableStateOf<CourseNote?>(null) }
+    var resourceUrlState by remember { mutableStateOf("") }
 
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            resourceUrlState = it.toString()
+        }
+    }
     if (course == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("جاري تحميل بيانات المادة...")
@@ -780,7 +788,11 @@ fun AddResourceDialog(
     var url by remember { mutableStateOf("") }
     var desc by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("SLIDES") }
-
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { url = it.toString() }
+    }
     val types = listOf(
         "SLIDES" to "سلايد/ملزمة",
         "LINK" to "رابط موقع",
@@ -826,13 +838,21 @@ fun AddResourceDialog(
                     }
                 }
 
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text("الرابط أو مسار الملف (URL/Drive/PDF)") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
+               OutlinedTextField(
+            value = url,
+            onValueChange = { url = it },
+            label = { Text("الرابط أو مسار الملف (URL/Drive/PDF)") },
+            trailingIcon = {
+                IconButton(onClick = { filePickerLauncher.launch("*/*") }) {
+                    Icon(
+                        imageVector = Icons.Default.FolderOpen,
+                        contentDescription = "اختيار ملف من الجهاز"
+                    )
+                }
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
 
                 OutlinedTextField(
                     value = desc,
