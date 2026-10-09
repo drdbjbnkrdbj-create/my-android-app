@@ -22,11 +22,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 sealed class ScreenDestination {
-    object Home : ScreenDestination()
-    data class CourseDetail(val courseId: Long, val initialTab: Int = 0) : ScreenDestination()
-    object Timetable : ScreenDestination()
-    object Profile : ScreenDestination()
-    object AllDeadlines : ScreenDestination()
+    data object Login : ScreenDestination()
+    data object Home : ScreenDestination()
+    data class CourseDetail(val courseId: Long = 0L, val initialTab: Int = 0) : ScreenDestination()
+    data object Timetable : ScreenDestination()
+    data object Profile : ScreenDestination()
+    data object AllDeadlines : ScreenDestination()
 }
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -34,7 +35,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: UniversityRepository
     private val prefs = application.getSharedPreferences("jami_prefs", Context.MODE_PRIVATE)
 
-    // Dark mode state - default to Dark (Navy & Slate) as requested
+    // Dark mode state
     private val _isDarkMode = MutableStateFlow(prefs.getBoolean("is_dark_mode", true))
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
@@ -50,7 +51,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Navigation Stack
-    private val _currentScreen = MutableStateFlow<ScreenDestination>(ScreenDestination.Home)
+    private val _currentScreen = MutableStateFlow<ScreenDestination>(ScreenDestination.Login)
     val currentScreen: StateFlow<ScreenDestination> = _currentScreen.asStateFlow()
 
     private val navBackStack = mutableListOf<ScreenDestination>()
@@ -274,5 +275,4 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.deleteLecture(lecture)
         }
-    }
-}
+    }}

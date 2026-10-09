@@ -31,7 +31,7 @@ import com.example.ui.ScreenDestination
 import com.example.ui.screens.CourseDetailScreen
 import com.example.ui.screens.DeadlinesScreen
 import com.example.ui.screens.HomeScreen
-import com.example.ui.screens.LoginScreen // تم إضافة استدعاء شاشة الدخول
+import com.example.ui.screens.LoginScreen
 import com.example.ui.screens.StudentProfileScreen
 import com.example.ui.screens.TimetableScreen
 import com.example.ui.theme.JamiAppTheme
@@ -49,8 +49,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background,
-                    bottomBar = {
-                        // إخفاء الشريط السفلي في شاشة التفاصيل وشاشة الدخول
+                 bottomBar = {
                         if (currentScreen !is ScreenDestination.CourseDetail && currentScreen !is ScreenDestination.Login) {
                             UniversityBottomNavigation(
                                 currentScreen = currentScreen,
