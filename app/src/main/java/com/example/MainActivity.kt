@@ -31,6 +31,7 @@ import com.example.ui.ScreenDestination
 import com.example.ui.screens.CourseDetailScreen
 import com.example.ui.screens.DeadlinesScreen
 import com.example.ui.screens.HomeScreen
+import com.example.ui.screens.LoginScreen // تم إضافة استدعاء شاشة الدخول
 import com.example.ui.screens.StudentProfileScreen
 import com.example.ui.screens.TimetableScreen
 import com.example.ui.theme.JamiAppTheme
@@ -49,7 +50,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background,
                     bottomBar = {
-                        if (currentScreen !is ScreenDestination.CourseDetail) {
+                        // إخفاء الشريط السفلي في شاشة التفاصيل وشاشة الدخول
+                        if (currentScreen !is ScreenDestination.CourseDetail && currentScreen !is ScreenDestination.Login) {
                             UniversityBottomNavigation(
                                 currentScreen = currentScreen,
                                 onSelect = { dest -> viewModel.navigateTo(dest) }
@@ -63,6 +65,14 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                     ) {
                         when (val dest = currentScreen) {
+                            is ScreenDestination.Login -> {
+                                LoginScreen(
+                                    viewModel = viewModel,
+                                    onLoginSuccess = {
+                                        viewModel.navigateTo(ScreenDestination.Home)
+                                    }
+                                )
+                            }
                             is ScreenDestination.Home -> {
                                 HomeScreen(
                                     viewModel = viewModel,
