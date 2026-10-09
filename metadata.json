@@ -1,0 +1,6 @@
+{
+  "name": "جامعي",
+  "description": "منصة شاملة ومركزة لطلاب الجامعة لتنظيم المواد الدراسية، الملازم والمراجع، الملاحظات والرسم، ومواعيد المشاريع والجدول الجامعي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

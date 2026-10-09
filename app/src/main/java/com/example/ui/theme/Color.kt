@@ -1,0 +1,51 @@
+package com.example.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+// Dark Mode - Deep Navy Blue & Slate Gray
+val DarkNavyBg = Color(0xFF0B132B)
+val DarkNavySurface = Color(0xFF131F37)
+val DarkNavySurfaceVariant = Color(0xFF1C2A47)
+val DarkPrimarySky = Color(0xFF38BDF8)
+val DarkPrimaryOn = Color(0xFF082F49)
+val DarkPrimaryContainer = Color(0xFF0C4A6E)
+val DarkOnPrimaryContainer = Color(0xFFE0F2FE)
+val DarkSecondarySlate = Color(0xFF94A3B8)
+val DarkSecondaryContainer = Color(0xFF334155)
+val DarkOnSecondaryContainer = Color(0xFFF1F5F9)
+val DarkTertiaryBlue = Color(0xFF60A5FA)
+val DarkTertiaryContainer = Color(0xFF1E3A8A)
+val DarkOnTertiaryContainer = Color(0xFFDBEAFE)
+val DarkOutline = Color(0xFF475569)
+val DarkOutlineVariant = Color(0xFF334155)
+val DarkTextPrimary = Color(0xFFF8FAFC)
+val DarkTextSecondary = Color(0xFF94A3B8)
+
+// Light Mode - Crisp Clean White & Cool Slate Gray
+val LightBg = Color(0xFFF8FAFC)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceVariant = Color(0xFFF1F5F9)
+val LightPrimaryBlue = Color(0xFF0284C7)
+val LightPrimaryOn = Color(0xFFFFFFFF)
+val LightPrimaryContainer = Color(0xFFE0F2FE)
+val LightOnPrimaryContainer = Color(0xFF0369A1)
+val LightSecondarySlate = Color(0xFF475569)
+val LightSecondaryContainer = Color(0xFFE2E8F0)
+val LightOnSecondaryContainer = Color(0xFF1E293B)
+val LightTertiaryBlue = Color(0xFF2563EB)
+val LightTertiaryContainer = Color(0xFFDBEAFE)
+val LightOnTertiaryContainer = Color(0xFF1D4ED8)
+val LightOutline = Color(0xFFCBD5E1)
+val LightOutlineVariant = Color(0xFFE2E8F0)
+val LightTextPrimary = Color(0xFF0F172A)
+val LightTextSecondary = Color(0xFF64748B)
+
+// Course Accent Colors
+val CourseBlue = Color(0xFF0284C7)
+val CourseIndigo = Color(0xFF4F46E5)
+val CourseCyan = Color(0xFF0891B2)
+val CourseEmerald = Color(0xFF059669)
+val CourseAmber = Color(0xFFD97706)
+val CourseRose = Color(0xFFE11D48)
+val CoursePurple = Color(0xFF9333EA)
+val CourseTeal = Color(0xFF0D9488)
