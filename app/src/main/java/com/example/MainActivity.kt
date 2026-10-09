@@ -1,5 +1,8 @@
 package com.example
 
+import com.google.firebase.auth.FirebaseAuth
+import com.example.ui.screens.LoginScreen
+import androidx.compose.runtime.setValue
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -43,55 +46,66 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            val viewModel: MainViewModel = viewModel()
-            val isDarkMode by viewModel.isDarkMode.collectAsStateWithLifecycle()
-            val currentScreen by viewModel.currentScreen.collectAsStateWithLifecycle()
+       setContent {
+        val viewModel: MainViewModel = viewModel()
+        val isDarkMode by viewModel.darkMode.collectAsStateWithLifecycle()
+        val currentScreen by viewModel.currentScreen.collectAsStateWithLifecycle()
 
-            // RTL support for Arabic university student experience
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                JamiAppTheme(darkTheme = isDarkMode) {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        containerColor = MaterialTheme.colorScheme.background,
-                        bottomBar = {
-                            if (currentScreen !is ScreenDestination.CourseDetail) {
-                                UniversityBottomNavigation(
-                                    currentScreen = currentScreen,
-                                    onSelect = { dest -> viewModel.navigateTo(dest) }
+        // حالة التحقق من تسجيل الدخول بواسطة Firebase
+        var isLoggedIn by remember { 
+            mutableStateOf(FirebaseAuth.getInstance().currentUser != null) 
+        }
+
+        JamiAppTheme(darkTheme = isDarkMode) {
+            if (!isLoggedIn) {
+                // عرض شاشة تسجيل الدخول إذا لم يكن المستخدم مسجلاً
+                LoginScreen(
+                    onLoginSuccess = {
+                        isLoggedIn = true
+                    }
+                )
+            } else {
+                // واجهة التطبيق الرئيسية (الـ Scaffold القديم)
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = MaterialTheme.colorScheme.background,
+                    bottomBar = {
+                        if (currentScreen !is ScreenDestination.CourseDetail) {
+                            UniversityBottomNavigation(
+                                currentScreen = currentScreen,
+                                onSelect = { dest -> viewModel.navigateTo(dest) }
+                            )
+                        }
+                    }
+                ) { innerPadding ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        when (val dest = currentScreen) {
+                            is ScreenDestination.Home -> {
+                                HomeScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToTimetable = { viewModel.navigateTo(ScreenDestination.Timetable) },
+                                    onNavigateToProfile = { viewModel.navigateTo(ScreenDestination.Profile) },
+                                    onNavigateToDeadlines = { viewModel.navigateTo(ScreenDestination.AllDeadlines) }
                                 )
                             }
-                        }
-                    ) { innerPadding ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding)
-                        ) {
-                            when (val dest = currentScreen) {
-                                is ScreenDestination.Home -> {
-                                    HomeScreen(
-                                        viewModel = viewModel,
-                                        onNavigateToTimetable = { viewModel.navigateTo(ScreenDestination.Timetable) },
-                                        onNavigateToProfile = { viewModel.navigateTo(ScreenDestination.Profile) },
-                                        onNavigateToDeadlines = { viewModel.navigateTo(ScreenDestination.AllDeadlines) }
-                                    )
-                                }
-                                is ScreenDestination.CourseDetail -> {
-                                    CourseDetailScreen(
-                                        viewModel = viewModel,
-                                        initialTab = dest.initialTab
-                                    )
-                                }
-                                is ScreenDestination.Timetable -> {
-                                    TimetableScreen(viewModel = viewModel)
-                                }
-                                is ScreenDestination.Profile -> {
-                                    StudentProfileScreen(viewModel = viewModel)
-                                }
-                                is ScreenDestination.AllDeadlines -> {
-                                    DeadlinesScreen(viewModel = viewModel)
-                                }
+                            is ScreenDestination.CourseDetail -> {
+                                CourseDetailScreen(
+                                    viewModel = viewModel,
+                                    initialTab = dest.initialTab
+                                )
+                            }
+                            is ScreenDestination.Timetable -> {
+                                TimetableScreen(viewModel = viewModel)
+                            }
+                            is ScreenDestination.Profile -> {
+                                StudentProfileScreen(viewModel = viewModel)
+                            }
+                            is ScreenDestination.AllDeadlines -> {
+                                DeadlinesScreen(viewModel = viewModel)
                             }
                         }
                     }
@@ -99,7 +113,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
 @Composable
 fun UniversityBottomNavigation(
