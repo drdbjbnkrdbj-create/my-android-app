@@ -1,6 +1,5 @@
 package com.example.ui.screens
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.item
+
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -165,7 +164,7 @@ fun StudentProfileScreen(viewModel: MainViewModel) {
         ) {
             item { Spacer(modifier = Modifier.height(2.dp)) }
 
-            // Theme Mode Selector Card (مود داكن أزرق/رمادي - مود فاتح أبيض/رمادي)
+            // Theme Mode Selector Card
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -186,7 +185,6 @@ fun StudentProfileScreen(viewModel: MainViewModel) {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            // Dark Mode Option (Navy & Slate Gray)
                             Surface(
                                 onClick = { viewModel.setDarkMode(true) },
                                 shape = RoundedCornerShape(12.dp),
@@ -221,7 +219,6 @@ fun StudentProfileScreen(viewModel: MainViewModel) {
                                 }
                             }
 
-                            // Light Mode Option (White & Slate Gray)
                             Surface(
                                 onClick = { viewModel.setDarkMode(false) },
                                 shape = RoundedCornerShape(12.dp),
@@ -491,43 +488,44 @@ fun StudentProfileScreen(viewModel: MainViewModel) {
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(40.dp)) }
-        }
-    }
-    item {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "منصة جيم",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Developed by the Greatest Developer, Khattab",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "جميع الحقوق محفوظة لصالح المطور، التعديل قد يعرضك للملاحقة القانونية © 2026",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // Developer Footer Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "منصة جيم",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Developed by the Greatest Developer, Khattab",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = "جميع الحقوق محفوظة لصالح المطور، التعديل قد يعرضك للملاحقة القانونية © 2026",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
+
+            item { Spacer(modifier = Modifier.height(20.dp)) }
         }
     }
 }
-
