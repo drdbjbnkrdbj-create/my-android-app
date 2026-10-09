@@ -1,5 +1,6 @@
 package com.example
-
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.auth.FirebaseAuth
 import com.example.ui.screens.LoginScreen
 import androidx.compose.runtime.setValue
@@ -155,4 +156,4 @@ fun UniversityBottomNavigation(
             modifier = Modifier.testTag("nav_item_profile")
         )
     }
-}
+}   }
