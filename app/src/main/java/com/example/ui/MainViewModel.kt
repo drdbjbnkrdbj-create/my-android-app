@@ -2,6 +2,7 @@ package com.example.ui
 
 import android.app.Application
 import android.content.Context
+import android.content.res.Configuration
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.db.AppDatabase
@@ -35,8 +36,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: UniversityRepository
     private val prefs = application.getSharedPreferences("jami_prefs", Context.MODE_PRIVATE)
 
-    // Dark mode state
-    private val _isDarkMode = MutableStateFlow(prefs.getBoolean("is_dark_mode", true))
+    // التحقق من وضع النظام الافتراضي (داكن أو فاتح)
+    private val isSystemDark = (application.resources.configuration.uiMode and
+            Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+
+    // Dark mode state - يتبع النظام افتراضياً إذا لم يتم حفظ اختيار مسبق
+    private val _isDarkMode = MutableStateFlow(prefs.getBoolean("is_dark_mode", isSystemDark))
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
     fun toggleDarkMode() {
@@ -275,4 +281,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.deleteLecture(lecture)
         }
-    }}
+    }
+}

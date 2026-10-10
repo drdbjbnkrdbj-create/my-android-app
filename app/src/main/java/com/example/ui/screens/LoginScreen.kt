@@ -1,22 +1,25 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.R // تأكد من استدعاء ملف الـ R الخاص بمشروعك
 import com.example.ui.MainViewModel
 
 @Composable
 fun LoginScreen(
     viewModel: MainViewModel,
     onLoginSuccess: () -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
+)
+ {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -24,42 +27,53 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // صورة أو لوجو التطبيق في أعلى شاشة الدخول
+        // تقدر تستبدل academic_hero_banner باسم أي صورة عندك في مجلد res/drawable
+        Image(
+            painter = painterResource(id = R.drawable.academic_hero_banner_1791526157022), // أو اسم اللوجو حقك
+            contentDescription = "شعار التطبيق",
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         Text(
-            text = "تسجيل الدخول",
+            text = "مرحباً بك في جامعي",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("البريد الإلكتروني") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+        Text(
+            text = "سجل دخولك باستخدام حساب جوجل للمتابعة",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("كلمة المرور") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+        // زر تسجيل الدخول بحساب جوجل
         Button(
-            onClick = { onLoginSuccess() },
+            onClick = { 
+                onLoginSuccess() 
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
         ) {
-            Text("دخول")
+            Text(
+                text = "المتابعة باستخدام Google",
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }

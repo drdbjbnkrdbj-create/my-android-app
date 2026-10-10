@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -65,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.StudentProfile
 import com.example.ui.MainViewModel
+import com.example.ui.ScreenDestination
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,6 +165,59 @@ fun StudentProfileScreen(viewModel: MainViewModel) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { Spacer(modifier = Modifier.height(2.dp)) }
+
+            //Login Status & Session Card
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .background(color = MaterialTheme.colorScheme.primary, shape = CircleShape)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "حالة الاتصال",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "مسجل الدخول عبر Google",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        Button(
+                            onClick = {
+                                viewModel.navigateTo(ScreenDestination.Login)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        ) {
+                            Text(text = "خروج", fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
 
             // Theme Mode Selector Card
             item {
