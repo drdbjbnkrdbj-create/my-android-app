@@ -10,7 +10,7 @@ fun AddCourseDialog(
         colorHex: String,
         iconName: String
     ) -> Unit
-) {
+) 
     var name by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
     var instructor by remember { mutableStateOf("") }
