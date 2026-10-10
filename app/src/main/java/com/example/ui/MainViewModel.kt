@@ -56,6 +56,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         prefs.edit().putBoolean("is_dark_mode", dark).apply()
     }
 
+    // Login Status State (حالة تسجيل الدخول مخزنة محلياً)
+    private val _isLoggedIn = MutableStateFlow(prefs.getBoolean("is_logged_in", false))
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
+    fun setLoggedIn(status: Boolean) {
+        _isLoggedIn.value = status
+        prefs.edit().putBoolean("is_logged_in", status).apply()
+    }
+
     // Navigation Stack
     private val _currentScreen = MutableStateFlow<ScreenDestination>(ScreenDestination.Login)
     val currentScreen: StateFlow<ScreenDestination> = _currentScreen.asStateFlow()

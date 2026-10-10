@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,31 +10,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.R // تأكد من استدعاء ملف الـ R الخاص بمشروعك
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import kotlinx.coroutines.launch
+import com.example.R
 import com.example.ui.MainViewModel
 
 @Composable
 fun LoginScreen(
     viewModel: MainViewModel,
     onLoginSuccess: () -> Unit
-)
- {
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // صورة أو لوجو التطبيق في أعلى شاشة الدخول
-        // تقدر تستبدل academic_hero_banner باسم أي صورة عندك في مجلد res/drawable
+    )
+     {
         Image(
-            painter = painterResource(id = R.drawable.academic_hero_banner_1791526157022), // أو اسم اللوجو حقك
+            painter = painterResource(id = R.drawable.splash_logo),
             contentDescription = "شعار التطبيق",
             modifier = Modifier
-                .size(100.dp)
+                .size(110.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop
         )
@@ -41,7 +48,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "مرحباً بك في جامعي",
+            text = "مرحباً بك في منصة جيم",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -49,17 +56,35 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "سجل دخولك باستخدام حساب جوجل للمتابعة",
+            text = "سجل دخولك باستخدام حساب جوجل للحصول على التجربة الكاملة",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // زر تسجيل الدخول بحساب جوجل
+        // زر تسجيل الدخول عبر Google
         Button(
-            onClick = { 
-                onLoginSuccess() 
+            onClick = {
+                coroutineScope.launch {
+                    try {
+                        val credentialManager = CredentialManager.create(context)
+                        val googleIdOption = GetGoogleIdOption.Builder()
+                            .setFilterByAuthorizedAccounts(false)
+                            .setServerClientId("YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
+                            .build()
+
+                        val request = GetCredentialRequest.Builder()
+                            .addCredentialOption(googleIdOption)
+                            .build()
+
+                        val result = credentialManager.getCredential(context, request)
+                        onLoginSuccess()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // في حال حدث خطأ أو ألغى النافذة، نترك الخيار للمستخدم
+                    }
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -67,12 +92,31 @@ fun LoginScreen(
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+            )
         ) {
             Text(
                 text = "المتابعة باستخدام Google",
                 style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // زر التخطي مع تنبيه لطيف
+        TextButton(
+            onClick = {
+                Toast.makeText(
+                    context,
+                    "تنبيه: لتجربة أفضل ومزامنة بياناتك يفضل تسجيل الدخول عبر Google",
+                    Toast.LENGTH_LONG
+                ).show()
+                onLoginSuccess()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "تخطي مؤقتاً",
+                color = MaterialTheme.colorScheme.outline
             )
         }
     }
