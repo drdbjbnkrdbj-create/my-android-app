@@ -24,10 +24,13 @@ jobs:
         run: keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
 
       - name: Build Debug APK
-        run: gradle assembleDebug
+        env:
+          JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
+          
