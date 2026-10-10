@@ -26,7 +26,11 @@ jobs:
       - name: Build Debug APK
         env:
           JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
+<<<<<<< HEAD
         run: ./gradlew assembleDebug --no-daemon
+=======
+        run: gradle assembleDebug
+>>>>>>> 088e4c450169d2547a430178b403af5280ebd77b
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
