@@ -2,6 +2,7 @@ package com.example.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.FolderOpen
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,7 +67,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.core.content.FileProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,6 +84,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
+import java.util.UUID
 import com.example.data.model.Course
 import com.example.data.model.CourseDeadline
 import com.example.data.model.CourseNote
@@ -120,15 +130,6 @@ fun CourseDetailScreen(
     var showAddDeadlineDialog by remember { mutableStateOf(false) }
     var showDeleteCourseDialog by remember { mutableStateOf(false) }
     var viewingNote by remember { mutableStateOf<CourseNote?>(null) }
-    var resourceUrlState by remember { mutableStateOf("") }
-
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            resourceUrlState = it.toString()
-        }
-    }
     if (course == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("جاري تحميل بيانات المادة...")
@@ -364,11 +365,35 @@ fun CourseDetailScreen(
                                             try {
                                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(res.urlOrPath))
                                                 context.startActivity(intent)
-                                            } catch (_: Exception) {
+                                            } catch (_: ActivityNotFoundException) {
                                                 Toast.makeText(context, "تعذر فتح الرابط", Toast.LENGTH_SHORT).show()
                                             }
                                         } else {
-                                            Toast.makeText(context, res.urlOrPath, Toast.LENGTH_SHORT).show()
+                                            val pdfDirectory = File(context.filesDir, "resources")
+                                            val file = File(res.urlOrPath)
+                                            try {
+                                                if (!file.isFile ||
+                                                    !file.canonicalPath.startsWith(pdfDirectory.canonicalPath + File.separator)
+                                                ) {
+                                                    Toast.makeText(context, "ملف PDF غير موجود في التخزين المحلي", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    val fileUri = FileProvider.getUriForFile(
+                                                        context,
+                                                        "${context.packageName}.fileprovider",
+                                                        file
+                                                    )
+                                                    val intent = Intent(Intent.ACTION_VIEW)
+                                                        .setDataAndType(fileUri, "application/pdf")
+                                                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                    context.startActivity(Intent.createChooser(intent, "فتح ملف PDF"))
+                                                }
+                                            } catch (_: ActivityNotFoundException) {
+                                                Toast.makeText(context, "لا يوجد تطبيق لفتح ملفات PDF", Toast.LENGTH_SHORT).show()
+                                            } catch (_: IllegalArgumentException) {
+                                                Toast.makeText(context, "تعذر فتح ملف PDF المحلي", Toast.LENGTH_SHORT).show()
+                                            } catch (_: IOException) {
+                                                Toast.makeText(context, "تعذر الوصول إلى ملف PDF المحلي", Toast.LENGTH_SHORT).show()
+                                            }
                                         }
                                     },
                                     onCopy = {
@@ -575,7 +600,11 @@ fun ResourceItemCard(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = resource.urlOrPath,
+                    text = if (resource.urlOrPath.endsWith(".pdf", ignoreCase = true)) {
+                        File(resource.urlOrPath).name
+                    } else {
+                        resource.urlOrPath
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
@@ -590,7 +619,9 @@ fun ResourceItemCard(
                         modifier = Modifier.size(15.dp)
                     )
                 }
-                if (resource.urlOrPath.startsWith("http")) {
+                if (resource.urlOrPath.startsWith("http") ||
+                    resource.urlOrPath.endsWith(".pdf", ignoreCase = true)
+                ) {
                     Spacer(modifier = Modifier.width(4.dp))
                     IconButton(onClick = onOpenUrl, modifier = Modifier.size(24.dp)) {
                         Icon(
@@ -790,17 +821,53 @@ fun AddResourceDialog(
     var url by remember { mutableStateOf("") }
     var desc by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("SLIDES") }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
-        uri?.let { url = it.toString() }
+        uri?.let { selectedUri ->
+            coroutineScope.launch {
+                try {
+                    val savedFile = withContext(Dispatchers.IO) {
+                        val directory = File(context.filesDir, "resources")
+                        if (!directory.exists() && !directory.mkdirs()) {
+                            throw IOException("Could not create PDF storage directory")
+                        }
+                        val temporaryFile = File.createTempFile("pdf-", ".tmp", directory)
+                        try {
+                            val input = context.contentResolver.openInputStream(selectedUri)
+                                ?: throw IOException("Could not open selected PDF")
+                            input.use { source ->
+                                temporaryFile.outputStream().use { output -> source.copyTo(output) }
+                            }
+                            val destination = File(directory, "${UUID.randomUUID()}.pdf")
+                            if (!temporaryFile.renameTo(destination)) {
+                                throw IOException("Could not save imported PDF")
+                            }
+                            destination
+                        } finally {
+                            temporaryFile.delete()
+                        }
+                    }
+                    url = savedFile.absolutePath
+                    selectedType = "FILE"
+                    Toast.makeText(context, "تم حفظ ملف PDF محليًا", Toast.LENGTH_SHORT).show()
+                } catch (error: IOException) {
+                    Toast.makeText(context, "تعذر حفظ ملف PDF: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                } catch (error: SecurityException) {
+                    Toast.makeText(context, "تعذر الوصول إلى ملف PDF المحدد", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
     val types = listOf(
         "SLIDES" to "سلايد/ملزمة",
         "LINK" to "رابط موقع",
         "BOOK" to "كتاب",
         "REFERENCE" to "مرجع",
-        "SUMMARY" to "ملخص"
+        "SUMMARY" to "ملخص",
+        "FILE" to "ملف PDF"
     )
 
     AlertDialog(
@@ -818,11 +885,11 @@ fun AddResourceDialog(
 
                 // Type selector
                 Text("نوع المرجع:", style = MaterialTheme.typography.bodySmall)
-                Row(
+                LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    types.forEach { (typeKey, label) ->
+                    items(types) { (typeKey, label) ->
                         val isSelected = selectedType == typeKey
                         Box(
                             modifier = Modifier
@@ -845,7 +912,7 @@ fun AddResourceDialog(
             onValueChange = { url = it },
             label = { Text("الرابط أو مسار الملف (URL/Drive/PDF)") },
             trailingIcon = {
-                IconButton(onClick = { filePickerLauncher.launch("*/*") }) {
+                IconButton(onClick = { filePickerLauncher.launch(arrayOf("application/pdf")) }) {
                     Icon(
                         imageVector = Icons.Default.FolderOpen,
                         contentDescription = "اختيار ملف من الجهاز"

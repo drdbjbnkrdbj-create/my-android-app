@@ -82,6 +82,9 @@ interface DeadlineDao {
     @Query("SELECT * FROM course_deadlines ORDER BY isCompleted ASC, dueDate ASC")
     fun getAllDeadlines(): Flow<List<CourseDeadline>>
 
+    @Query("SELECT COUNT(*) FROM course_deadlines WHERE isCompleted = 0")
+    suspend fun getPendingDeadlineCount(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDeadline(deadline: CourseDeadline): Long
 
