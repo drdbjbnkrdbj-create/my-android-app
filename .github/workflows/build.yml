@@ -18,15 +18,17 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
 
       - name: Generate Debug Keystore
         run: keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
 
       - name: Build Debug APK
         env:
-          JAVA_TOOL_OPTIONS: "-Djava.awt.headless+true"
-        run: gradle assembleDebug
+          JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
+        run: gradle --no-daemon --no-build-cache --no-configuration-cache --no-parallel --max-workers=1 clean kspDebugKotlin assembleDebug
 
 
       - name: Upload APK
